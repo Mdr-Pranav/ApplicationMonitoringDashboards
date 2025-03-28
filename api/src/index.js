@@ -63,7 +63,12 @@ const requestLoggerMiddleware = async (req, res, next) => {
               timestamp: new Date().toISOString(),
               responseTime: responseTime,
               statusCode: res.statusCode,
-              error: isError
+              error: isError,
+              requestIp: req.ip || req.connection.remoteAddress,
+              userAgent: req.headers['user-agent'] || '',
+              message: isError 
+                ? `Error processing ${req.method} ${req.path}` 
+                : `Successfully processed ${req.method} ${req.path}`
             })
           }
         ]
