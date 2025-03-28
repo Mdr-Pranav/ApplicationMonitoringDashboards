@@ -1,0 +1,14 @@
+{
+  "name": "monitoring-dashboard-kafka-consumer",
+  "version": "1.0.0",
+  "description": "Kafka consumer for Application Monitoring Dashboard",
+  "main": "consumer.js",
+  "scripts": {
+    "start": "node consumer.js"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4",
+    "pg": "^8.11.3",
+    "winston": "^3.11.0"
+  }
+} 
