@@ -30,24 +30,37 @@ const pool = new Pool({
   port: 5432
 });
 
-// Initialize database table
+// Define topics and their corresponding table names
+const TOPICS = {
+  'test-logs': 'test_logs',
+  'error-logs': 'error_logs',
+  'delay-logs': 'delay_logs',
+  'unreliable-logs': 'unreliable_logs',
+  'health-logs': 'health_logs',
+  'other-logs': 'other_logs'
+};
+
+// Initialize database tables
 async function initializeDatabase() {
   try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS api_logs (
-        id SERIAL PRIMARY KEY,
-        endpoint VARCHAR(255),
-        method VARCHAR(10),
-        timestamp TIMESTAMP,
-        response_time INTEGER,
-        status_code INTEGER,
-        error BOOLEAN DEFAULT false,
-        request_ip VARCHAR(45),
-        user_agent TEXT,
-        message TEXT
-      )
-    `);
-    logger.info('Database table initialized');
+    // Create tables for each topic
+    for (const [topic, tableName] of Object.entries(TOPICS)) {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS ${tableName} (
+          id SERIAL PRIMARY KEY,
+          endpoint VARCHAR(255),
+          method VARCHAR(10),
+          timestamp TIMESTAMP,
+          response_time INTEGER,
+          status_code INTEGER,
+          error BOOLEAN DEFAULT false,
+          request_ip VARCHAR(45),
+          user_agent TEXT,
+          message TEXT
+        )
+      `);
+      logger.info(`Database table ${tableName} initialized`);
+    }
   } catch (error) {
     logger.error('Error initializing database:', error);
     throw error;
@@ -55,12 +68,14 @@ async function initializeDatabase() {
 }
 
 // Process messages
-async function processMessage(message) {
+async function processMessage(topic, message) {
   try {
     const log = JSON.parse(message.value.toString());
+    const tableName = TOPICS[topic] || TOPICS['other-logs'];
     
     await pool.query(
-      'INSERT INTO api_logs (endpoint, method, timestamp, response_time, status_code, error, request_ip, user_agent, message) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)',
+      `INSERT INTO ${tableName} (endpoint, method, timestamp, response_time, status_code, error, request_ip, user_agent, message) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
       [
         log.endpoint, 
         log.method, 
@@ -73,8 +88,9 @@ async function processMessage(message) {
         log.message || ''
       ]
     );
+    logger.info(`Message processed and stored in ${tableName}`);
   } catch (error) {
-    logger.error('Error processing message:', error);
+    logger.error(`Error processing message for topic ${topic}:`, error);
   }
 }
 
@@ -83,11 +99,16 @@ async function startConsumer() {
   try {
     await initializeDatabase();
     await consumer.connect();
-    await consumer.subscribe({ topic: 'api-logs', fromBeginning: true });
+    
+    // Subscribe to all topics
+    for (const topic of Object.keys(TOPICS)) {
+      await consumer.subscribe({ topic, fromBeginning: true });
+      logger.info(`Subscribed to topic: ${topic}`);
+    }
 
     await consumer.run({
       eachMessage: async ({ topic, partition, message }) => {
-        await processMessage(message);
+        await processMessage(topic, message);
       },
     });
 

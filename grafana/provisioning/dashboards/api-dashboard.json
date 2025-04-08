@@ -91,7 +91,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  endpoint as metric\nFROM api_logs\nWHERE\n  $__timeFilter(timestamp)\nGROUP BY 1, endpoint\nORDER BY 1",
+          "rawSql": "SELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  'test' as metric\nFROM test_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  'error' as metric\nFROM error_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  'delay' as metric\nFROM delay_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  'unreliable' as metric\nFROM unreliable_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  'health' as metric\nFROM health_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  'other' as metric\nFROM other_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [
             [
@@ -199,7 +199,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  endpoint as metric\nFROM api_logs\nWHERE\n  $__timeFilter(timestamp)\nGROUP BY 1, endpoint\nORDER BY 1",
+          "rawSql": "SELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  'test' as metric\nFROM test_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  'error' as metric\nFROM error_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  'delay' as metric\nFROM delay_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  'unreliable' as metric\nFROM unreliable_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  'health' as metric\nFROM health_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  AVG(response_time) as value,\n  'other' as metric\nFROM other_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [
             [
@@ -248,8 +248,8 @@
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
-            "lineWidth": 0,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -258,7 +258,7 @@
             "spanNulls": true,
             "stacking": {
               "group": "A",
-              "mode": "normal"
+              "mode": "none"
             },
             "thresholdsStyle": {
               "mode": "off"
@@ -273,13 +273,14 @@
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
+        "w": 12,
         "x": 0,
         "y": 8
       },
@@ -306,7 +307,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  date_trunc('minute', timestamp) as time,\n  COUNT(*) as value,\n  endpoint as metric\nFROM api_logs\nWHERE\n  $__timeFilter(timestamp)\n  AND error = true\nGROUP BY 1, endpoint\nORDER BY 1",
+          "rawSql": "SELECT\n  date_trunc('minute', timestamp) as time,\n  (COUNT(*) FILTER (WHERE error = true) * 100.0 / COUNT(*)) as value,\n  'test' as metric\nFROM test_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  (COUNT(*) FILTER (WHERE error = true) * 100.0 / COUNT(*)) as value,\n  'error' as metric\nFROM error_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  (COUNT(*) FILTER (WHERE error = true) * 100.0 / COUNT(*)) as value,\n  'delay' as metric\nFROM delay_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  (COUNT(*) FILTER (WHERE error = true) * 100.0 / COUNT(*)) as value,\n  'unreliable' as metric\nFROM unreliable_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  (COUNT(*) FILTER (WHERE error = true) * 100.0 / COUNT(*)) as value,\n  'health' as metric\nFROM health_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nUNION ALL\nSELECT\n  date_trunc('minute', timestamp) as time,\n  (COUNT(*) FILTER (WHERE error = true) * 100.0 / COUNT(*)) as value,\n  'other' as metric\nFROM other_logs\nWHERE $__timeFilter(timestamp)\nGROUP BY 1\nORDER BY 1",
           "refId": "A",
           "select": [
             [
@@ -328,7 +329,7 @@
           ]
         }
       ],
-      "title": "Error Count by Endpoint",
+      "title": "Error Rate",
       "type": "timeseries"
     },
     {
@@ -493,7 +494,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "SELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error\nFROM api_logs\nWHERE\n  $__timeFilter(timestamp)\nORDER BY timestamp DESC\nLIMIT 100",
+          "rawSql": "SELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error,\n  'test_logs' as kafka_topic,\n  'test' as source\nFROM test_logs\nWHERE $__timeFilter(timestamp)\nUNION ALL\nSELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error,\n  'error_logs' as kafka_topic,\n  'error' as source\nFROM error_logs\nWHERE $__timeFilter(timestamp)\nUNION ALL\nSELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error,\n  'delay_logs' as kafka_topic,\n  'delay' as source\nFROM delay_logs\nWHERE $__timeFilter(timestamp)\nUNION ALL\nSELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error,\n  'unreliable_logs' as kafka_topic,\n  'unreliable' as source\nFROM unreliable_logs\nWHERE $__timeFilter(timestamp)\nUNION ALL\nSELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error,\n  'health_logs' as kafka_topic,\n  'health' as source\nFROM health_logs\nWHERE $__timeFilter(timestamp)\nUNION ALL\nSELECT\n  timestamp,\n  endpoint,\n  method,\n  response_time,\n  error,\n  'other_logs' as kafka_topic,\n  'other' as source\nFROM other_logs\nWHERE $__timeFilter(timestamp)\nORDER BY timestamp DESC\nLIMIT 100",
           "refId": "A",
           "select": [
             [
@@ -505,7 +506,6 @@
               }
             ]
           ],
-          "table": "api_logs",
           "timeColumn": "timestamp",
           "timeColumnType": "timestamp",
           "where": [
@@ -529,7 +529,7 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {},

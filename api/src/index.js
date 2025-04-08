@@ -40,6 +40,24 @@ const pool = new Pool({
   port: 5432
 });
 
+// Helper function to get topic name based on endpoint
+const getTopicName = (path) => {
+  // Strip trailing slashes and convert to lowercase
+  path = path.toLowerCase().replace(/\/$/, '');
+  
+  // Map endpoints to specific topics
+  const topicMap = {
+    '/api/test': 'test-logs',
+    '/api/error': 'error-logs',
+    '/api/delay': 'delay-logs',
+    '/api/unreliable': 'unreliable-logs',
+    '/health': 'health-logs'
+  };
+
+  // Return mapped topic or default to 'other-logs' if endpoint not found
+  return topicMap[path] || 'other-logs';
+};
+
 // Middleware to log request info to Kafka
 const requestLoggerMiddleware = async (req, res, next) => {
   const startTime = Date.now();
@@ -51,21 +69,22 @@ const requestLoggerMiddleware = async (req, res, next) => {
   res.end = async function(...args) {
     const responseTime = Date.now() - startTime;
     const isError = res.statusCode >= 400;
+    const topic = getTopicName(req.path);
     
     try {
       await producer.send({
-        topic: 'api-logs',
+        topic: topic,
         messages: [
           {
             value: JSON.stringify({
               endpoint: req.path,
               method: req.method,
-              timestamp: new Date().toISOString(),
               responseTime: responseTime,
               statusCode: res.statusCode,
               error: isError,
               requestIp: req.ip || req.connection.remoteAddress,
               userAgent: req.headers['user-agent'] || '',
+              timestamp: new Date().toISOString(),
               message: isError 
                 ? `Error processing ${req.method} ${req.path}` 
                 : `Successfully processed ${req.method} ${req.path}`
@@ -75,9 +94,9 @@ const requestLoggerMiddleware = async (req, res, next) => {
       });
       
       if (isError) {
-        logger.error(`Request error: ${req.method} ${req.path} - Status: ${res.statusCode}`);
+        logger.error(`Request error: ${req.method} ${req.path} - Status: ${res.statusCode} - Topic: ${topic}`);
       } else {
-        logger.info(`Request processed: ${req.method} ${req.path} - Status: ${res.statusCode}`);
+        logger.info(`Request processed: ${req.method} ${req.path} - Status: ${res.statusCode} - Topic: ${topic}`);
       }
     } catch (error) {
       logger.error('Error sending log to Kafka:', error);
