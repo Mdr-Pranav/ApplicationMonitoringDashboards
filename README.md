@@ -22,9 +22,13 @@ This project implements a Log Analytics Platform that collects, processes, and v
 ## Quick Start
 
 1. Clone the repository
-2. Run `docker-compose up -d`
-3. Access Grafana at http://localhost:3000 (username: admin, password: admin)
-4. Access API at http://localhost:8080
+2. Create your environment file and set the passwords:
+   ```bash
+   cp .env.example .env
+   ```
+3. Run `docker-compose up -d`
+4. Access Grafana at http://localhost:3000 (username: `admin`, password: `GRAFANA_ADMIN_PASSWORD` from `.env`)
+5. Access API at http://localhost:8080
 
 ## Running the Project
 
@@ -91,7 +95,7 @@ docker-compose down -v
 After starting the project:
 
 1. Go to http://localhost:3000 in your browser
-2. Log in using admin/admin credentials
+2. Log in as `admin` with the `GRAFANA_ADMIN_PASSWORD` you set in `.env`
 3. The API Monitoring Dashboard will show:
    - Request Count per Endpoint
    - Response Time Trends

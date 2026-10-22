@@ -9,8 +9,8 @@ datasources:
     type: postgres
     access: proxy
     url: postgres:5432
-    user: admin
-    database: logs
+    user: $POSTGRES_USER
+    database: $POSTGRES_DB
     isDefault: true
     jsonData:
       sslmode: "disable"
@@ -19,6 +19,6 @@ datasources:
       connMaxLifetime: 14400
       postgresVersion: 1400
     secureJsonData:
-      password: "admin123"
+      password: $POSTGRES_PASSWORD
     version: 1
     editable: false

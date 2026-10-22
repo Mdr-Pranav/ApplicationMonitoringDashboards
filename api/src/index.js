@@ -34,7 +34,7 @@ const producer = kafka.producer();
 // Initialize PostgreSQL
 const pool = new Pool({
   user: process.env.POSTGRES_USER || 'admin',
-  password: process.env.POSTGRES_PASSWORD || 'admin123',
+  password: process.env.POSTGRES_PASSWORD,
   host: process.env.POSTGRES_HOST || 'postgres',
   database: process.env.POSTGRES_DB || 'logs',
   port: 5432

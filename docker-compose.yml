@@ -9,6 +9,10 @@ services:
     environment:
       - KAFKA_BROKERS=kafka:29092
       - NODE_ENV=development
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=${POSTGRES_DB:-logs}
     depends_on:
       - kafka
       - postgres
@@ -18,10 +22,10 @@ services:
     build: ./kafka
     environment:
       - KAFKA_BROKERS=kafka:29092
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=admin123
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
       - POSTGRES_HOST=postgres
-      - POSTGRES_DB=logs
+      - POSTGRES_DB=${POSTGRES_DB:-logs}
     depends_on:
       - kafka
       - postgres
@@ -53,9 +57,9 @@ services:
   postgres:
     image: postgres:latest
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
-      POSTGRES_DB: logs
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      POSTGRES_DB: ${POSTGRES_DB:-logs}
     ports:
       - "5432:5432"
     volumes:
@@ -67,8 +71,11 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
       - GF_SECURITY_ADMIN_USER=admin
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (see .env.example)}
+      - POSTGRES_DB=${POSTGRES_DB:-logs}
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
       - GF_LOG_LEVEL=debug
     volumes:
